@@ -1,0 +1,135 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="ExpenseTracker.MainWindow"
+        Title="Expense Tracker" Height="600" Width="1000">
+    <Window.Resources>
+        <Style TargetType="{x:Type Label}">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Width" Value="200"/>
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Width" Value="110"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="DodgerBlue"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style TargetType="{x:Type DatePicker}">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Width" Value="200"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="392*"/>
+            <ColumnDefinition Width="15*"/>
+            <ColumnDefinition Width="573*"/>
+        </Grid.ColumnDefinitions>
+
+        <GroupBox Header="Добавление и редактирование расходов" Grid.Row="0" Grid.Column="0" Margin="5,5,490,5" Grid.ColumnSpan="3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Наименование:" Grid.Column="0" Grid.Row="0"/>
+                <TextBox x:Name="txtName" Grid.Column="1" Grid.Row="0"/>
+                <Label Content="Дата:" Grid.Column="0" Grid.Row="1"/>
+                <DatePicker x:Name="datePicker" Grid.Column="1" Grid.Row="1"/>
+                <Label Content="Сумма:" Grid.Column="0" Grid.Row="2"/>
+                <TextBox x:Name="txtAmount" Grid.Column="1" Grid.Row="2"/>
+                <Label Content="Категория:" Grid.Column="0" Grid.Row="3"/>
+                <TextBox x:Name="txtCategory" Grid.Column="1" Grid.Row="3"/>
+                <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal">
+                    <Button x:Name="btnSave" Content="Сохранить" Click="btnSave_Click_1"/>
+                    <Button x:Name="btnEdit" Content="Редактировать" Click="btnEdit_Click"/>
+                    <Button x:Name="btnDelete" Content="Удалить" Click="btnDelete_Click"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Список расходов" Grid.Row="0" Grid.Column="2" Margin="161,5,5,5">
+            <ListBox x:Name="expensesListBox" SelectionChanged="expensesListBox_SelectionChanged" SelectionMode="Multiple"
+        ScrollViewer.VerticalScrollBarVisibility="Auto"
+         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+         MaxHeight="150">
+                <ListBox.FocusVisualStyle>
+                    <Style/>
+                </ListBox.FocusVisualStyle>
+            </ListBox>
+
+        </GroupBox>
+
+        <GroupBox Header="Фильтр и экспорт" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,5,5,189">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="13.5"/>
+                    <ColumnDefinition Width="102.403"/>
+                    <ColumnDefinition Width="85*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="708*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Начальная дата:" Grid.Column="0" Grid.Row="0" Margin="5,5,5,5" Grid.ColumnSpan="2"/>
+                <DatePicker x:Name="startDatePicker" Grid.Column="4" Grid.Row="0" Margin="187,5,321,5"/>
+                <Label Content="Конечная дата:" Grid.Column="0" Grid.Row="1" Margin="5,5,5,5" Grid.ColumnSpan="2"/>
+                <DatePicker x:Name="endDatePicker" Grid.Column="4" Grid.Row="1" Margin="187,5,321,5"/>
+                <TextBlock x:Name="totalExpensesTextBlock"  FontWeight="Bold" Grid.Column="4" Margin="320,0,283,-7" Grid.Row="2" />
+
+                <StackPanel Grid.Column="2" Grid.Row="2" Orientation="Horizontal" Grid.ColumnSpan="3">
+                    <Button x:Name="btnFilter" Content="Фильтровать" Click="btnFilter_Click_1"/>
+                    <Button x:Name="btnExport" Content="Экспорт" Click="btnExport_Click_1"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="График расходов" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,138,5,5" Grid.RowSpan="2">
+            <lvc:CartesianChart x:Name="expensesChart" Series="{Binding SeriesCollection}" LegendLocation="Right" 
+                Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Grid.RowSpan="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <lvc:CartesianChart.AxisY>
+                    <lvc:Axis Title="Сумма" LabelFormatter="{Binding Formatter}"/>
+                </lvc:CartesianChart.AxisY>
+                <lvc:CartesianChart.AxisX>
+                    <lvc:Axis Title="Категории" Labels="{Binding Labels}" MinValue="0" MaxValue="{Binding Labels.Count}"/>
+                </lvc:CartesianChart.AxisX>
+            </lvc:CartesianChart>
+        </GroupBox>
+    </Grid>
+</Window>
+
