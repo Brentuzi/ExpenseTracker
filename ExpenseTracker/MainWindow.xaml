@@ -3,7 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="ExpenseTracker.MainWindow"
-        Title="Expense Tracker" Height="600" Width="1000">
+        Title="Expense Tracker" Height="600" Width="1000"
+      Icon="icon\1.jpg">
+    
+    
     <Window.Resources>
         <Style TargetType="{x:Type Label}">
             <Setter Property="Margin" Value="5"/>
@@ -44,12 +47,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="392*"/>
+            <ColumnDefinition Width="43*"/>
+            <ColumnDefinition Width="349*"/>
             <ColumnDefinition Width="15*"/>
             <ColumnDefinition Width="573*"/>
         </Grid.ColumnDefinitions>
 
-        <GroupBox Header="Добавление и редактирование расходов" Grid.Row="0" Grid.Column="0" Margin="5,5,490,5" Grid.ColumnSpan="3">
+        <GroupBox Header="Добавление и редактирование расходов" Grid.Row="0" Grid.Column="0" Margin="5,5,490,5" Grid.ColumnSpan="4">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -72,15 +76,15 @@
                 <Label Content="Категория:" Grid.Column="0" Grid.Row="3"/>
                 <TextBox x:Name="txtCategory" Grid.Column="1" Grid.Row="3"/>
                 <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal">
-                    <Button x:Name="btnSave" Content="Сохранить" Click="btnSave_Click_1"/>
+                    <Button x:Name="btnSave" Content="Добавить" Click="btnSave_Click_1"/>
                     <Button x:Name="btnEdit" Content="Редактировать" Click="btnEdit_Click"/>
                     <Button x:Name="btnDelete" Content="Удалить" Click="btnDelete_Click"/>
                 </StackPanel>
             </Grid>
         </GroupBox>
 
-        <GroupBox Header="Список расходов" Grid.Row="0" Grid.Column="2" Margin="161,5,5,5">
-            <ListBox x:Name="expensesListBox" SelectionChanged="expensesListBox_SelectionChanged" SelectionMode="Multiple"
+        <GroupBox Header="Список расходов" Grid.Row="0" Grid.Column="3" Margin="161,5,5,5">
+            <ListBox x:Name="expensesListBox" SelectionChanged="expensesListBox_SelectionChanged"
         ScrollViewer.VerticalScrollBarVisibility="Auto"
          ScrollViewer.HorizontalScrollBarVisibility="Auto"
          MaxHeight="150">
@@ -91,7 +95,7 @@
 
         </GroupBox>
 
-        <GroupBox Header="Фильтр и экспорт" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,5,5,189">
+        <GroupBox Header="Фильтр и экспорт" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="5,5,5,189">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -115,11 +119,12 @@
                 <StackPanel Grid.Column="2" Grid.Row="2" Orientation="Horizontal" Grid.ColumnSpan="3">
                     <Button x:Name="btnFilter" Content="Фильтровать" Click="btnFilter_Click_1"/>
                     <Button x:Name="btnExport" Content="Экспорт" Click="btnExport_Click_1"/>
+                    <Button x:Name="btnImport" Content="Импорт"  Click="btnImport_Click"/>
                 </StackPanel>
             </Grid>
         </GroupBox>
 
-        <GroupBox Header="График расходов" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5,138,5,5" Grid.RowSpan="2">
+        <GroupBox Header="График расходов" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Margin="5,138,5,5">
             <lvc:CartesianChart x:Name="expensesChart" Series="{Binding SeriesCollection}" LegendLocation="Right" 
                 Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Grid.RowSpan="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <lvc:CartesianChart.AxisY>

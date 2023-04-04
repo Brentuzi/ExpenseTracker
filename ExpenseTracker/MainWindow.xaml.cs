@@ -110,13 +110,33 @@ namespace ExpenseTracker
                 Values = new ChartValues<double>(expenses.Values.SelectMany(list => list.Select(tuple => tuple.Item1)))
             });
             expensesListBox.Items.Clear();
+
+
+
+
+
+
+            List<string> expenseItems = new List<string>();
+
             foreach (var category in expenses.Keys)
             {
                 foreach (var expense in expenses[category])
                 {
-                    expensesListBox.Items.Add($"{category}, {expense.Item2:yyyy-MM-dd}: {expense.Item1}");
+                    // Добавьте элементы в список expenseItems вместо expensesListBox
+                    expenseItems.Add($"{category}, {expense.Item2:yyyy-MM-dd}, {expense.Item1}, {category}");
                 }
             }
+
+            // Отсортируйте список по категории
+            expenseItems = expenseItems.OrderBy(item => item.Split(',')[0]).ToList();
+
+            // Добавьте отсортированные элементы в expensesListBox
+            foreach (string item in expenseItems)
+            {
+                expensesListBox.Items.Add(item);
+            }
+
+
         }
 
 
@@ -182,13 +202,12 @@ namespace ExpenseTracker
         {
             if (expensesListBox.SelectedIndex != -1)
             {
-               
-                string[] splitByColon = expensesListBox.SelectedItem.ToString().Split(':');
-                string[] expenseData = splitByColon[0].Split(',');
+                string[] splitByColon = expensesListBox.SelectedItem.ToString().Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                string category = expenseData[0].Trim();
-                string dateString = expenseData[1].Trim();
-                double amount = double.Parse(splitByColon[1].Trim().Split(' ')[0]);
+                string category = splitByColon[0].Trim();
+                string dateString = splitByColon[1].Trim();
+                double amount = double.Parse(splitByColon[2].Trim().Split(' ')[0]);
+                string name = splitByColon[3].Trim();
 
                 DateTime date;
                 string dateFormat = "yyyy-MM-dd";
@@ -198,8 +217,8 @@ namespace ExpenseTracker
                     return;
                 }
 
-           
-                txtName.Text = category;
+
+                txtName.Text = name;
                 datePicker.SelectedDate = date;
                 txtAmount.Text = amount.ToString();
                 txtCategory.Text = category;
@@ -228,6 +247,10 @@ namespace ExpenseTracker
             }
 
         }
+
+
+
+
         private int? _selectedExpenseRowIndex;
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
@@ -276,5 +299,54 @@ namespace ExpenseTracker
                 MessageBox.Show("Выберите расход для удаления", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+
+        private void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Excel Files|*.xls;*.xlsx;*.xlsm";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+
+                using (ExcelPackage package = new ExcelPackage(new FileInfo(filePath)))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+                    int rowCount = worksheet.Dimension.Rows;
+
+                    DateTime baseDate = new DateTime(1900, 1, 1);
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        string name = worksheet.Cells[row, 1].Value.ToString();
+                        int dateInt = int.Parse(worksheet.Cells[row, 2].Value.ToString());
+                        DateTime date = baseDate.AddDays(dateInt - 2); // Вычитаем 2, потому что Excel считает 1900 год високосным, хотя на самом деле это не так
+                        double amount = double.Parse(worksheet.Cells[row, 3].Value.ToString());
+                        string category = worksheet.Cells[row, 4].Value.ToString();
+
+                        // Добавьте код для добавления импортированных данных в ваш файл данных
+                        using (ExcelPackage appPackage = new ExcelPackage(new FileInfo(excelFilePath)))
+                        {
+                            ExcelWorksheet appWorksheet = appPackage.Workbook.Worksheets[0];
+                            int newRow = appWorksheet.Dimension.End.Row + 1;
+                            appWorksheet.Cells[newRow, 1].Value = name;
+                            appWorksheet.Cells[newRow, 2].Value = date;
+                            appWorksheet.Cells[newRow, 3].Value = amount;
+                            appWorksheet.Cells[newRow, 4].Value = category;
+                            appPackage.Save();
+                        }
+                    }
+                }
+
+                // Обновите список и график расходов после импорта данных
+                LoadExpenses();
+            }
+        }
+
+
+
+
+
     }
 }
