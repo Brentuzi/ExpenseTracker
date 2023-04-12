@@ -2,11 +2,16 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-        xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="ExpenseTracker.MainWindow"
-        Title="Expense Tracker" Height="600" Width="1000"
-      Icon="icon\1.jpg">
+    xmlns:liveCharts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+
+
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av" x:Class="ExpenseTracker.MainWindow"
+        Title="Expense Tracker" Height="600" Width="1050"
     
-    
+      Icon="icon\1.jpg" WindowStyle="ThreeDBorderWindow">
+
+
     <Window.Resources>
         <Style TargetType="{x:Type Label}">
             <Setter Property="Margin" Value="5"/>
@@ -68,13 +73,16 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Content="Наименование:" Grid.Column="0" Grid.Row="0"/>
-                <TextBox x:Name="txtName" Grid.Column="1" Grid.Row="0"/>
+                <TextBox x:Name="txtName" Grid.Column="1" Grid.Row="0" TextChanged="txtName_TextChanged"/>
                 <Label Content="Дата:" Grid.Column="0" Grid.Row="1"/>
                 <DatePicker x:Name="datePicker" Grid.Column="1" Grid.Row="1"/>
                 <Label Content="Сумма:" Grid.Column="0" Grid.Row="2"/>
-                <TextBox x:Name="txtAmount" Grid.Column="1" Grid.Row="2"/>
+                <TextBox x:Name="txtAmount" Grid.Column="1" Grid.Row="2" TextChanged="txtAmount_TextChanged"/>
                 <Label Content="Категория:" Grid.Column="0" Grid.Row="3"/>
-                <TextBox x:Name="txtCategory" Grid.Column="1" Grid.Row="3"/>
+
+                <ComboBox x:Name="txtCategory"   IsEditable="True" IsTextSearchEnabled="True" Grid.Column="1" Grid.Row="3" Width="200" Height="26"/>
+
+
                 <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal">
                     <Button x:Name="btnSave" Content="Добавить" Click="btnSave_Click_1"/>
                     <Button x:Name="btnEdit" Content="Редактировать" Click="btnEdit_Click"/>
@@ -120,7 +128,9 @@
                     <Button x:Name="btnFilter" Content="Фильтровать" Click="btnFilter_Click_1"/>
                     <Button x:Name="btnExport" Content="Экспорт" Click="btnExport_Click_1"/>
                     <Button x:Name="btnImport" Content="Импорт"  Click="btnImport_Click"/>
+
                 </StackPanel>
+                <liveCharts:PieChart x:Name="categoryPieChart" Grid.Column="4" Margin="523,-18,0,-18" Grid.RowSpan="3"  />
             </Grid>
         </GroupBox>
 
@@ -135,6 +145,7 @@
                 </lvc:CartesianChart.AxisX>
             </lvc:CartesianChart>
         </GroupBox>
+
     </Grid>
 </Window>
 

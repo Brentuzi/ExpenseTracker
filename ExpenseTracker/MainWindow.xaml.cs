@@ -1,14 +1,14 @@
-﻿using System;
+﻿using LiveCharts;
+using LiveCharts.Wpf;
+using Microsoft.Win32;
+using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using OfficeOpenXml;
-using LiveCharts;
-using LiveCharts.Wpf;
-using Microsoft.Win32;
-using System.Globalization;
-
 
 namespace ExpenseTracker
 {
@@ -22,7 +22,11 @@ namespace ExpenseTracker
 
         public MainWindow()
         {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // для некоммерческого
+
             InitializeComponent();
+            InitializeCategories();
+            CheckAndCreateExcelFile();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             SeriesCollection = new SeriesCollection();
             Labels = new List<string>();
@@ -50,11 +54,57 @@ namespace ExpenseTracker
                 package.Save();
             }
         }
+        private void CreateCategoryPieChart(Dictionary<string, List<(double, DateTime, string)>> expenses)
+        {
+            categoryPieChart.Series.Clear();
+
+            foreach (var category in expenses.Keys)
+            {
+                double totalAmount = expenses[category].Sum(expense => expense.Item1);
+                PieSeries pieSeries = new PieSeries
+                {
+                    Title = category,
+                    Values = new ChartValues<double> { totalAmount },
+                    DataLabels = true
+                };
+
+                categoryPieChart.Series.Add(pieSeries);
+            }
+        }
+        private void CheckAndCreateExcelFile()
+        {
+            string filePath = "expenses.xlsx";
+            if (!File.Exists(filePath))
+            {
+                using (ExcelPackage excelPackage = new ExcelPackage())
+                {
+                    // Создать лист
+                    ExcelWorksheet worksheet = excelPackage.Workbook.Worksheets.Add("Expenses");
+
+                    // Задать заголовки
+                    worksheet.Cells[1, 1].Value = "Наименование";
+                    worksheet.Cells[1, 2].Value = "Дата";
+                    worksheet.Cells[1, 3].Value = "Сумма";
+                    worksheet.Cells[1, 4].Value = "Категория";
+
+                    // Добавить тестовые данные
+                    worksheet.Cells[2, 1].Value = "Тестовая запись";
+                    worksheet.Cells[2, 2].Value = DateTime.Now.ToShortDateString();
+                    worksheet.Cells[2, 3].Value = 100;
+                    worksheet.Cells[2, 4].Value = "Продукты";
+
+                    // Сохранить файл
+                    FileInfo excelFile = new FileInfo(filePath);
+                    excelPackage.SaveAs(excelFile);
+                }
+            }
+        }
 
 
         private void LoadExpenses(DateTime? startDate = null, DateTime? endDate = null)
         {
-            var expenses = new Dictionary<string, List<(double, DateTime)>>();
+
+            var expenses = new Dictionary<string, List<(double, DateTime, string)>>();
 
             using (ExcelPackage package = new ExcelPackage(new FileInfo(excelFilePath)))
             {
@@ -65,7 +115,7 @@ namespace ExpenseTracker
                     string category = worksheet.Cells[row, 4].GetValue<string>();
                     double amount = worksheet.Cells[row, 3].GetValue<double>();
                     DateTime date = worksheet.Cells[row, 2].GetValue<DateTime>();
-
+                    string name = worksheet.Cells[row, 1].GetValue<string>();
                     if (startDate.HasValue && date < startDate.Value)
                     {
                         continue;
@@ -78,17 +128,17 @@ namespace ExpenseTracker
 
                     if (expenses.ContainsKey(category))
                     {
-                        expenses[category].Add((amount, date));
+                        expenses[category].Add((amount, date, name));
                     }
                     else
                     {
-                        expenses[category] = new List<(double, DateTime)> { (amount, date) };
+                        expenses[category] = new List<(double, DateTime, string)> { (amount, date, name) };
                     }
                 }
                 double totalExpenses = expenses.Values.SelectMany(list => list.Select(tuple => tuple.Item1)).Sum();
 
                 // Обновление значения TextBlock
-                totalExpensesTextBlock.Text = $"Общая сумма: {totalExpenses.ToString("C")}";
+                totalExpensesTextBlock.Text = $"Общая сумма: {totalExpenses.ToString()} $";
 
             }
 
@@ -114,28 +164,26 @@ namespace ExpenseTracker
 
 
 
-
-
             List<string> expenseItems = new List<string>();
-
             foreach (var category in expenses.Keys)
             {
                 foreach (var expense in expenses[category])
                 {
-                    // Добавьте элементы в список expenseItems вместо expensesListBox
-                    expenseItems.Add($"{category}, {expense.Item2:yyyy-MM-dd}, {expense.Item1}, {category}");
+                    string itemName = expense.Item3;
+                    expenseItems.Add($"{category}, {expense.Item2:yyyy-MM-dd}, {expense.Item1}, {itemName}");
                 }
             }
 
-            // Отсортируйте список по категории
+
+            // список по категории
             expenseItems = expenseItems.OrderBy(item => item.Split(',')[0]).ToList();
 
-            // Добавьте отсортированные элементы в expensesListBox
+            // отсортированные элементы в expensesListBox
             foreach (string item in expenseItems)
             {
                 expensesListBox.Items.Add(item);
             }
-
+            CreateCategoryPieChart(expenses);
 
         }
 
@@ -161,6 +209,12 @@ namespace ExpenseTracker
                 worksheet.Cells[newRow, 3].Value = amount;
                 worksheet.Cells[newRow, 4].Value = category;
                 package.Save();
+            }
+            string newCategory = txtCategory.Text;
+
+            if (!string.IsNullOrWhiteSpace(newCategory) && !_categories.Contains(newCategory))
+            {
+                _categories.Add(newCategory);
             }
 
             LoadExpenses();
@@ -196,7 +250,7 @@ namespace ExpenseTracker
         }
 
 
-        
+
 
         private void expensesListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -208,6 +262,7 @@ namespace ExpenseTracker
                 string dateString = splitByColon[1].Trim();
                 double amount = double.Parse(splitByColon[2].Trim().Split(' ')[0]);
                 string name = splitByColon[3].Trim();
+
 
                 DateTime date;
                 string dateFormat = "yyyy-MM-dd";
@@ -223,7 +278,7 @@ namespace ExpenseTracker
                 txtAmount.Text = amount.ToString();
                 txtCategory.Text = category;
 
-              
+
                 using (ExcelPackage package = new ExcelPackage(new FileInfo(excelFilePath)))
                 {
                     ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
@@ -344,9 +399,35 @@ namespace ExpenseTracker
             }
         }
 
+        private void txtAmount_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            double parsedValue;
+            if (!double.TryParse(txtAmount.Text, out parsedValue))
+            {
+                MessageBox.Show("Введите только числа");
+                txtAmount.Text = "";
+            }
+        }
 
+        private void txtName_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
 
+        }
+        private ObservableCollection<string> _categories;
+        private void InitializeCategories()
+        {
+            _categories = new ObservableCollection<string>
+            {
+                "Продукты",
+                "Транспорт",
+                "Развлечения",
+                "Одежда",
+                "Коммунальные услуги"
+            };
 
-
+            txtCategory.ItemsSource = _categories;
+            txtCategory.SelectedIndex = 0;
+            txtCategory.IsEditable = true;
+        }
     }
 }
