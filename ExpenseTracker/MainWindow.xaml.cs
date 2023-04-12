@@ -148,7 +148,7 @@ namespace ExpenseTracker
             {
                 foreach (var expense in expenses[category])
                 {
-                    categoryDates.Add($"{category}, {expense.Item2:yyyy-MM-dd}: {expense.Item1}");
+                    categoryDates.Add($"{category}, {expense.Item2:dd-MM-yyyy}: {expense.Item1}");
                 }
             }
 
@@ -170,7 +170,7 @@ namespace ExpenseTracker
                 foreach (var expense in expenses[category])
                 {
                     string itemName = expense.Item3;
-                    expenseItems.Add($"{category}, {expense.Item2:yyyy-MM-dd}, {expense.Item1}, {itemName}");
+                    expenseItems.Add($"{category}, {expense.Item2:dd-MM-yyyy}, {expense.Item1}, {itemName}");
                 }
             }
 
@@ -265,7 +265,7 @@ namespace ExpenseTracker
 
 
                 DateTime date;
-                string dateFormat = "yyyy-MM-dd";
+                string dateFormat = "dd-MM-yyyy";
                 if (!DateTime.TryParseExact(dateString, dateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
                 {
                     MessageBox.Show($"Не удалось разобрать дату \"{dateString}\". Ожидаемый формат: \"{dateFormat}\"");
